@@ -1,0 +1,6 @@
+*.json
+*.sh
+*.md
+*.terraform
+*.terraform.*
+kubeconfig-prd
