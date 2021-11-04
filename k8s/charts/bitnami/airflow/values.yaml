@@ -175,8 +175,8 @@ auth:
   ## If it is not forced, a random password will be generated.
   ##
   forcePassword: true
-  password: "airflow"
-  username: "airflow"
+  password: airflow
+  username: airflow
   ## More info about the secret key at:
   ## - https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#secret-key
   ##
@@ -789,17 +789,17 @@ git:
     ##     path: /
     ##
     repositories:
-      - repository: "https://github.com/camposvinicius/k8s"
+      - repository: https://github.com/camposvinicius/gcp-etl
       
         ## Branch from repository to checkout
         ##
-        branch: "master"
+        branch: master
         ## An unique identifier for repository, must be unique for each repository
         ##
-        name: "github"
+        name: github
         ## Path to a folder in the repository containing the dags
         ##
-        path: "k8s/dags/dags"
+        path: k8s/dags/dags
   ## Get Plugins files from git repositories.
   ## @param git.plugins.enabled Enable in order to download Plugins files from git repositories.
   ## @param git.plugins.repositories [array] Array of repositories from which to download DAG files
