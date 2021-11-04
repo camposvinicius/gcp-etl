@@ -2,7 +2,6 @@ provider "google" {
   version = ">= 3.90.0"
   region  = var.region
 }
-
 module "gke_auth" {
   source       = "terraform-google-modules/kubernetes-engine/google//modules/auth"
   depends_on   = [module.gke]
@@ -44,25 +43,28 @@ module "gcp-network" {
 }
 
 module "gke" {
-  source            = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
-  depends_on        = [google_project_service.project]
-  project_id        = var.project_id
-  name              = "${var.cluster_name}-${var.env_name}"
-  regional          = true
-  region            = var.region
-  network           = module.gcp-network.network_name
-  subnetwork        = module.gcp-network.subnets_names[0]
-  ip_range_pods     = var.ip_range_pods_name
-  ip_range_services = var.ip_range_services_name
+  source                     = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
+  depends_on                 = [google_project_service.project]
+  project_id                 = var.project_id
+  name                       = "${var.cluster_name}-${var.env_name}"
+  regional                   = true
+  region                     = var.region
+  network                    = module.gcp-network.network_name
+  subnetwork                 = module.gcp-network.subnets_names[0]
+  ip_range_pods              = var.ip_range_pods_name
+  ip_range_services          = var.ip_range_services_name
+  horizontal_pod_autoscaling = true
   node_pools = [
     {
       name           = "node-pool"
       machine_type   = "e2-medium"
       node_locations = "us-east1-b"
-      min_count      = 1
-      max_count      = 2
+      min_count      = 3
+      max_count      = 12
       disk_size_gb   = 30,
       autoscaling    = true,
+      auto_repair    = true
+      auto_upgrade   = true
     },
   ]
 }
