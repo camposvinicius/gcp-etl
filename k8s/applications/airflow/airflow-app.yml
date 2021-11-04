@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: airflow-bitnami
+  name: airflow-astronomer
   namespace: argocd 
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/bitnami/charts
+    repoURL: https://github.com/camposvinicius/gcp-etl
     targetRevision: HEAD
-    path: bitnami/airflow
+    path: k8s/charts/airflow/chart
   destination:
     server: https://kubernetes.default.svc
-    namespace: airflow
+    namespace: airflow-astronomer
   syncPolicy:
     automated:
       selfHeal: true
