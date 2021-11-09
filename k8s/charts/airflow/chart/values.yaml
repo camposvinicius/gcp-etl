@@ -398,7 +398,7 @@ workers:
   # Allow KEDA autoscaling.
   # Persistence.enabled must be set to false to use KEDA.
   keda:
-    enabled: false
+    enabled: true
     namespaceLabels: {}
 
     # How often KEDA polls the airflow DB to report new scale requests to the HPA
@@ -721,11 +721,11 @@ webserver:
   defaultUser:
     enabled: true
     role: Admin
-    username: airflow
+    username: admin
     email: admin@example.com
     firstName: Vinicius
     lastName: Campos
-    password: airflow
+    password: admin
 
   # Launch additional containers into webserver.
   extraContainers: []
