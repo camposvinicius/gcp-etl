@@ -721,11 +721,11 @@ webserver:
   defaultUser:
     enabled: true
     role: Admin
-    username: airflow
+    username: admin
     email: admin@example.com
     firstName: Vinicius
     lastName: Campos
-    password: airflow
+    password: admin
 
   # Launch additional containers into webserver.
   extraContainers: []
