@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: airflow-astronomer
+  name: airflow
   namespace: argocd 
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -10,10 +10,10 @@ spec:
   source:
     repoURL: https://github.com/camposvinicius/gcp-etl
     targetRevision: HEAD
-    path: k8s/charts/airflow/chart
+    path: k8s/charts/airflow/chart/charts/airflow
   destination:
     server: https://kubernetes.default.svc
-    namespace: airflow-astronomer
+    namespace: airflow
   syncPolicy:
     automated:
       selfHeal: true
