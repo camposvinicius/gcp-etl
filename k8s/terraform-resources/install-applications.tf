@@ -37,5 +37,4 @@ resource "kubectl_manifest" "airflow" {
   count              = length(data.kubectl_file_documents.airflow.documents)
   yaml_body          = element(data.kubectl_file_documents.airflow.documents, count.index)
   override_namespace = "argocd"
-  wait               = false
 }
