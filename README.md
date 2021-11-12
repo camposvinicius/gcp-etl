@@ -18,7 +18,7 @@ List of tools we will be using:
 - Terraform
 
 ## Pipeline Orchestration
-- Airflow
+- Airflow (_Helm Chart used:_ https://artifacthub.io/packages/helm/airflow-helm/airflow)
 
 ## CI/CD (Github Workflow)
 - `verify.yml` for testing and validation of resource construction
