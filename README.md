@@ -2434,6 +2434,26 @@ prometheusRule:
   groups: []
 ```
 
+<<<<<<< HEAD
+=======
+**Remember to connect to your kubernetes cluster before doing the commands below!**
+
+Let's do a port-forward to access our argocd.
+
+```sh
+$ kubectl port-forward svc/argocd-server -n argocd 8181:443
+```
+
+By going to `localhost:8181`, you will find this splash screen. With this command you can get your password and login with the username `admin`.
+
+```sh
+$ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+![argocd](https://user-images.githubusercontent.com/86246834/141663828-8d0b95a4-8e76-4a41-8f94-26ecd4079feb.png)
+
+
+>>>>>>> master
 ## Applications Script
 
 Here you will find an airflow-app.yml file, which is basically applying my custom values ​​from my application seen above, in an `airflow` namespace that will be created during the deploy. Just pass the cloned chart path.
@@ -2464,6 +2484,32 @@ spec:
     - CreateNamespace=true
 ```
 
+![argocd-applications](https://user-images.githubusercontent.com/86246834/141664120-d52ea3f7-5c9d-446b-a3d2-5b28ea78486a.png)
+
+As you can see, our airflow namespace was already created automatically during deploy and also our custom application. Now, let's port-forward our application to access it.
+
+```sh
+$ kubectl port-forward svc/airflow-web -n airflow 8080:8080
+```
+
+![airflow-localhost](https://user-images.githubusercontent.com/86246834/141664305-159b860d-0638-41e5-b57b-fca6ea06d598.png)
+
+Let's enter the default username and password in this chart, **username: admin** and **pass: admin**.
+
+![airflow-error-dag](https://user-images.githubusercontent.com/86246834/141664329-d27e903d-b2ec-4d05-83d8-d08928064573.png)
+
+As you can see, it managed to sync with our dag repository, but there is a connection problem, which hasn't been created yet. So let's create this UI connection.
+
+In _Admin > Connections > Create new record (+)_, you will change the `Conn Type` field to **Google Cloud** and set the `Conn Id` name equal to your dag's Conn Id name. Basically, you need to take your **google credentials**, which is a json, and paste it into the `Keyfile JSON` field, and your airflow will be connected to your GCP account. If you want, you can also add [scopes](k8s/dags/scopes_airflow_gcp.txt).
+
+![airflow-gcp-conn](https://user-images.githubusercontent.com/86246834/141664546-a68b0270-a065-404e-84a6-b601208ebd38.png)
+
+Now, let's check if our dag already appears and also see its structure.
+
+![airflow-dag-appears](https://user-images.githubusercontent.com/86246834/141664608-1c0ea774-463c-405e-bfdf-8b05b7f74ef3.png)
+
+![dag-structure](https://user-images.githubusercontent.com/86246834/141664666-58ba0ac4-6a92-4c50-974e-e9bce7de79b6.png)
+
 ## DAG Script
 
 Now let's understand what the DAG script is doing.
@@ -2476,7 +2522,7 @@ In parts the script will do:
 
 - 3 - Create an ephemero cluster in DataProc
 
-- 4 - un the Pyspark job
+- 4 - Run the Pyspark job
 
 - 5 - Keep poking every 15s if the Pyspark job failed or was successful.
 
@@ -2668,3 +2714,164 @@ with DAG(
         dataproc_job_sensor >> delete_dataproc_cluster
     )
 ```
+
+Now that we understand what our DAG does, let's turn it on and see if we succeed.
+
+![dag-result](https://user-images.githubusercontent.com/86246834/141664784-d846c1e0-1c92-464a-bff8-179b0e069509.png)
+
+As you can see, we were successful in DAG, let's see the result in BigQuery.
+
+![bigquery](https://user-images.githubusercontent.com/86246834/141664814-d61ec6df-9de3-457c-9b88-6e9186e4a92c.png)
+
+Let's do a simple query to see our result.
+
+![result-bigquery](https://user-images.githubusercontent.com/86246834/141664845-d257d908-ebe5-4d9b-bc15-aa1d7320676f.png)
+
+And here are our data processed and served for areas in general.
+
+## CI/CD
+
+_An important note is that to use these CI/CD mat automation files, you need to have created the branches: **master, dev and destroy**, in addition to adding your **google credentials** in the repository._
+
+Inside that [directory](.github/workflows), you will find three files:
+
+[verify.yml](.github/workflows/verify.yml)
+
+This yaml allows you to validate and check whether your terraform resource build deployment mat will succeed or not, but it won't build them and it happens every time there is a **pull request** in the **master** branch.
+
+```yaml
+name: 'Terraform CI Dev Test'
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: IaC Verify
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        COMMAND_IAC: terraform
+      run: |
+        cd k8s/terraform-resources
+        $COMMAND_IAC init
+        $COMMAND_IAC validate
+        $COMMAND_IAC plan
+```
+
+[deploy.yml](.github/workflows/deploy.yml)
+
+This yaml serves the same purpose as the previous one, however, here it builds the resources and occurs every time there is a **push** on the **master** branch.
+
+```yaml
+name: 'Terraform Deploy'
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: IaC Apply
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        COMMAND_IAC: terraform
+      run: |
+        cd k8s/terraform-resources
+        $COMMAND_IAC init
+        $COMMAND_IAC validate
+        $COMMAND_IAC plan
+        $COMMAND_IAC apply -auto-approve
+```
+
+[destroy.yml](.github/workflows/destroy.yml)
+
+This yaml basically has the purpose of destroying all the resources that have been created and it happens whenever there is a **push** on the **destroy** branch.
+
+```yaml
+name: 'Terraform Deploy'
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: IaC Apply
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        COMMAND_IAC: terraform
+      run: |
+        cd k8s/terraform-resources
+        $COMMAND_IAC init
+        $COMMAND_IAC validate
+        $COMMAND_IAC plan
+        $COMMAND_IAC apply -auto-approve
+```
+
+Now that we've finished our pipeline, it's time to destroy our resources, triggering our deployment treadmill on the **destroy** branch.
+
+![destroy-ci-cd](https://user-images.githubusercontent.com/86246834/141665408-dd39baa3-9505-4396-a418-3bc212a413cd.png)
+
+![destroy-terraform](https://user-images.githubusercontent.com/86246834/141665413-5af319b1-0a30-424a-8728-75c5dc479bed.png)
+
+
+If you have any questions or difficulties, you can contact me on [LinkedIn](https://www.linkedin.com/in/vinicius-de-paula-monteiro-de-campos-128aa8189/).
+
+
+
+
+
+
+
