@@ -2519,7 +2519,7 @@ In parts the script will do:
 
 - 3 - Create an ephemero cluster in DataProc
 
-- 4 - un the Pyspark job
+- 4 - Run the Pyspark job
 
 - 5 - Keep poking every 15s if the Pyspark job failed or was successful.
 
