@@ -2822,11 +2822,11 @@ jobs:
 This yaml basically has the purpose of destroying all the resources that have been created and it happens whenever there is a **push** on the **destroy** branch.
 
 ```yaml
-name: 'Terraform Deploy'
+name: 'Terraform Destroy'
 
 on:
   push:
-    branches: [master]
+    branches: [destroy]
 
 jobs:
   terraform:
@@ -2847,16 +2847,14 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
 
-    - name: IaC Apply
+    - name: IaC Destroy
       env:
         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         COMMAND_IAC: terraform
       run: |
         cd k8s/terraform-resources
         $COMMAND_IAC init
-        $COMMAND_IAC validate
-        $COMMAND_IAC plan
-        $COMMAND_IAC apply -auto-approve
+        $COMMAND_IAC destroy -auto-approve
 ```
 
 Now that we've finished our pipeline, it's time to destroy our resources, triggering our deployment treadmill on the **destroy** branch.
