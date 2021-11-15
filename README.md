@@ -2436,8 +2436,6 @@ prometheusRule:
   groups: []
 ```
 
-<<<<<<< HEAD
-=======
 **Remember to connect to your kubernetes cluster before doing the commands below!**
 
 Let's do a port-forward to access our argocd.
@@ -2455,7 +2453,6 @@ $ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.p
 ![argocd](https://user-images.githubusercontent.com/86246834/141663828-8d0b95a4-8e76-4a41-8f94-26ecd4079feb.png)
 
 
->>>>>>> master
 ## Applications Script
 
 Here you will find an airflow-app.yml file, which is basically applying my custom values ​​from my application seen above, in an `airflow` namespace that will be created during the deploy. Just pass the cloned chart path.
