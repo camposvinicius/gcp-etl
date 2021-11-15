@@ -155,7 +155,7 @@ with DAG(
     )
 
     for bucket in buckets:
-        delete_bucket_processing_zone = GCSDeleteBucketOperator(
+        delete_buckets = GCSDeleteBucketOperator(
             task_id=f"delete_{bucket}_zone",
             bucket_name=bucket,
             gcp_conn_id="gcp_new"
@@ -163,7 +163,7 @@ with DAG(
         (
             delete_dataproc_cluster >> bq_create_dataset >> ingest_df_into_bq_table >> 
             
-            check_bq_tb_count >> delete_bucket_processing_zone
+            check_bq_tb_count >> delete_buckets
         )
 
     (
