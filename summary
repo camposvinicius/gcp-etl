@@ -3,13 +3,13 @@
 fileName = ARGV[0]
 fileName = "README.md" if !fileName
 
-#File.write('test.log',"**Summary**" + "\n")
-toc = "**Summary**" + "\n"
+#File.write('test.log',"**Table of Contents**" + "\n")
+toc = "**Table of Contents**" + "\n"
 
 File.open(fileName, 'r+') do |f|
   inside_code_snippet = false
   f.each_line do |line|
-    forbidden_words = ['Summary', 'define', 'pragma']
+    forbidden_words = ['Table of contents', 'define', 'pragma']
     inside_code_snippet = !inside_code_snippet if line.start_with?('```')
     next if !line.start_with?("#") || forbidden_words.any? { |w| line =~ /#{w}/ } || inside_code_snippet
 
