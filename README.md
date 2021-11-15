@@ -393,6 +393,8 @@ Our script first calls the `read_json_and_write_parquet` function, which takes a
 
 Then it calls the function `write_on_curated_zone`, which also receives the spark defined as a parameter, the path_source and its shape which is now parquet, and the path_target and its shape, which will be served as avro due to optimization and line orientation for the bigquery. In this function, first the data is read and a view is created in memory and the value of the executed query is assigned to an object, which is also added in memory. Later, as a good practice and performance gain, the view is discarded, as it will no longer be used during the process, we cache our object in memory for performance gain and finally, we write the object.
 
+_A note about spark settings in **SparkSession**, as my query is simple, there is no need to have a tuning like this, but as this is close to what I use in my daily life, I chose to keep these settings._
+
 #### [etl-on-gcp-vinicius-campos.py](k8s/submit/etl-on-gcp-vinicius-campos.py)
 ```python
 import logging
