@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+fileName = ARGV[0]
+fileName = "README.md" if !fileName
+
+#File.write('test.log',"**Summary**" + "\n")
+toc = "**Summary**" + "\n"
+
+File.open(fileName, 'r+') do |f|
+  inside_code_snippet = false
+  f.each_line do |line|
+    forbidden_words = ['Summary', 'define', 'pragma']
+    inside_code_snippet = !inside_code_snippet if line.start_with?('```')
+    next if !line.start_with?("#") || forbidden_words.any? { |w| line =~ /#{w}/ } || inside_code_snippet
+
+    title = line.gsub("#", "").strip
+    href = title.gsub(" ", "-").downcase
+    toc = toc + "  " * (line.count("#")-1) + "* [#{title}](\##{href})" + "\n"
+  end
+  puts toc + "\n"
+end
